@@ -1,12 +1,15 @@
 const todoForm = document.querySelector('#todo-form');
 const itemInput = document.querySelector('#todo-input');
 const list = document.querySelector('#list-group');
-
+const container = document.querySelector('.container-cls');
 const removeButtons = document.querySelectorAll('[data-item-id]');
+const clear = document.querySelector('#clear');
 let currentLocalSet = [];
-todoForm.addEventListener('submit', addItem);
 
 document.addEventListener('DOMContentLoaded', (e) => {
+  list.addEventListener('click', removeItem);
+  todoForm.addEventListener('submit', addItem);
+  clear.addEventListener('click', clearAll);
   refreshItems();
 });
 
@@ -19,6 +22,7 @@ function addItem(e) {
     : (currentLocalSet = JSON.parse(currentLocalValue));
 
   if (itemInputVal != '') {
+    itemInput.value = '';
     currentLocalSet.push({ content: itemInputVal, check: false });
     localStorage.setItem('todo-items', JSON.stringify(currentLocalSet));
   } else {
@@ -31,12 +35,15 @@ function addItem(e) {
 function refreshItems() {
   let getItems = JSON.parse(localStorage.getItem('todo-items'));
   const items = [];
-  let html = ' ';
+  let html = '';
   getItems.forEach((e, i) => {
-    items.push(`<a href="#" class="list-group-item list-group-item-action p-">
+    items.push(`<li href="#" class="list-group-item">
        ${e.content} 
-      <button class="btn btn-outline-danger btn-sm float-right" data-item-id="${i}"> <i class="fas fa-times-circle"></i></button>
-       </i>`);
+
+    <span id="removeItem" class=" btn btn-danger btn-sm float-right"  data-index="${i}">
+    <i  class="fas fa-times-circle" style="pointer-events:none"></i>
+   
+    </span> </li>`);
   });
   items.reverse();
   items.map((e) => {
@@ -58,11 +65,18 @@ function showAlert(alertMessage, alertType) {
 }
 
 function removeItem(e) {
-  console.log(e);
-  e.preventDefault();
-  if (false) {
-    e > -1 ? currentLocalSet.splice(e, 1) : showAlert('opps.!!', 'danger');
-    localStorage.setItem = JSON.stringify(currentLocalSet);
+  if (e.target.id === 'removeItem') {
+    console.log(e.target.dataset.index);
+    let getItems = JSON.parse(localStorage.getItem('todo-items'));
+    getItems.splice(e.target.dataset.index, 1);
+    localStorage.setItem('todo-items', JSON.stringify(getItems));
     refreshItems();
   }
+}
+
+function clearAll() {
+  localStorage.removeItem('todo-items');
+  location.reload();
+
+  refreshItems();
 }

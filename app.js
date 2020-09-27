@@ -4,15 +4,39 @@ const list = document.querySelector('#list-group');
 const container = document.querySelector('.container-cls');
 const removeButtons = document.querySelectorAll('[data-item-id]');
 const clear = document.querySelector('#clear');
+const search = document.querySelector('#todo-search');
 let currentLocalSet = [];
-
+allEvents();
 document.addEventListener('DOMContentLoaded', (e) => {
-  list.addEventListener('click', removeItem);
-  todoForm.addEventListener('submit', addItem);
-  clear.addEventListener('click', clearAll);
   refreshItems();
+  itemInput.focus();
 });
 
+function allEvents() {
+  list.addEventListener('click', removeItem);
+  todoForm.addEventListener('submit', addItem);
+  itemInput.addEventListener('keypress', addEnterPress);
+  clear.addEventListener('click', clearAll);
+  search.addEventListener('keyup', searchItem);
+}
+
+function searchItem(e) {
+  const filterVal = e.target.value.toLowerCase();
+  const items = document.querySelectorAll('.list-group-item');
+  items.forEach((e) => {
+    const text = e.textContent.toLowerCase();
+    if (text.indexOf(filterVal) === -1) {
+      e.setAttribute('style', 'display:none');
+    } else {
+      e.setAttribute('style', 'display:block');
+    }
+  });
+  console.log(e.target.value);
+}
+
+function addEnterPress(e) {
+  if (e.key === 'Enter') addItem(e);
+}
 function addItem(e) {
   let itemInputVal = itemInput.value;
   let currentLocalValue = localStorage.getItem('todo-items');
@@ -25,6 +49,7 @@ function addItem(e) {
     itemInput.value = '';
     currentLocalSet.push({ content: itemInputVal, check: false });
     localStorage.setItem('todo-items', JSON.stringify(currentLocalSet));
+    itemInput.focus();
   } else {
     showAlert('Boş geçilemez', 'warning');
   }
@@ -40,7 +65,7 @@ function refreshItems() {
     items.push(`<li href="#" class="list-group-item">
        ${e.content} 
 
-    <span id="removeItem" class=" btn btn-danger btn-sm float-right"  data-index="${i}">
+    <span id="removeItem" class=" btn btn-warning text-white btn-sm float-right"  data-index="${i}">
     <i  class="fas fa-times-circle" style="pointer-events:none"></i>
    
     </span> </li>`);
@@ -77,6 +102,5 @@ function removeItem(e) {
 function clearAll() {
   localStorage.removeItem('todo-items');
   location.reload();
-
   refreshItems();
 }
